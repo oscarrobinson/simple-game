@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Simple Game</title>
+</head>
+<body>
+<canvas width="300" height="300" id="canvas"></canvas>
+
+<script type="text/javascript">
+/*
+This is a comment, any text here is not interpreted as code. I have written several comments
+to help you understand this code.
+*/
+
+//This is a single line comment, I will use these for shorter explanations
+
+/*
+This code is for a simple interactive "game" (it's not much of a game).
+
+You use the arrow keys on the keyboard to navigate the environment. The environment consists of spaces you can move in and walls you can't move through.
+
+Read through all the comments I've left in the code, they'll help you understand how it all works.
+
+I've also provided links to various resources that will help you understand how the different bits of
+code work.
+
+Let's get stuck in...
+*/
+
+
+/*
+Our "game" is rendered on an HTML5 canvas. What's that? It's basically an HTML element that you can
+draw shapes, lines, images and text onto.
+
+In the HTML above you can see we've defined a canvas: <canvas width="300" height="300" id="canvas"></canvas>
+
+It has an id of "canvas". In this line of code we get that canvas by its id and assing the canvas to a
+variable.
+
+A variable is something that contains some data. In the line below we're defining a variable called canvas
+that holds the data about our html5 canvas.
+
+This variable is a const (short for constant). That means once we have set it, it cannot be changed. We can't have another line of code that says canvas = "something else" as that will cause an error.
+
+Read more about variables here: https://www.w3schools.com/js/js_variables.asp
+*/
+const canvas = document.getElementById('canvas')
+
+/*
+We draw stuff to the canvas by manipulating the canvas context. So we read the canvas context into a variable.
+
+The canvas variable we created  earlier contains an object. An object is like a data container that can hold all
+sorts of different things. Numbers, strings (text), other objects, or functions. We'll get to functions further down
+but what's happenign here is we're calling a function that is contained in the canvas object. That function is called
+"getContext", we pass that function an argument of '2d'.
+
+If you want to read ahead:
+Functions: https://www.w3schools.com/js/js_functions.asp
+Objects: https://www.w3schools.com/js/js_objects.asp
+*/
+const ctx = canvas.getContext('2d')
+
+/*
+Here we assign an integer number of 10 to a variable. We'll use this later in the code. I've chosen the name of the variable to describe what that variable should be used for. It's important to name your variables well so that they
+descrive what the variable is going to be used for. This will make the code easier to read.
+*/
+const blockWidth = 10
+
+/*
+This variable contains an array of arrays. An array is basically a list. So this list is a list of lists of numbers.
+You can see the numbers are either 0 or 1. This array of arrays represents the map for the game,
+
+The map is divided into blocks and each block is either an empty space or a wall. 0 represents empty space
+and 1 is a wall.
+
+The choice of 1 and 0 to represent this is arbitrary. We could have represented a wall with the world "wall" and
+an empty space with the word "empty", but using 1s and 0s is neater.
+
+This variable is just data. It doesn't do anything on its own. We have to write instructions to interpet it and
+do things with it. The instructions below in this program use this data to render squares to the HTML5 canvas.
+*/
+const map = [
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
+/*
+Here we define some more variables we'll use later. 
+
+The variable names explain what they're for. But what does map.length and map[0].length mean?
+
+An array is also an object, it contains variables. One of those variables is its length. We can access
+this variable by using ".length". So the map height is the length of the main list of lists. You can see
+this intuitively by looking at the definition of the array above.
+
+map[0].length: here we're taking the first array from the array of arrays with map[0]. The first element in the
+array is element number 0, the next is number 1, the next is number 2. The number is called the index. So with
+map[0] we're getting the element in the array contained in the variable map that lies at the 0th index. That is,
+the first element in the array.
+
+The first element in the array is another array, so we then get its length. This gives us the width of our map.
+*/
+const mapHeight = map.length
+const mapWidth = map[0].length
+
+/*
+Here we define an object called characterPosition. The {   } means object and the x and y are properties 
+in the object.
+
+Object properties are basically like variables. They contain data. 
+
+Here the x variable will contain the player's character's position on the x axis of the map and the y variable
+will contian the player's character's y position on the map.
+
+The initial position is 0 in the x axis, i.e the far left of the map. The y is the height of the canvas - block width.
+
+Our character is a square and the coordinates of a square are its top left corner. Therefore for us to be able to see
+it, the top left corner has to be a block's width above the bottom of the canvas. If it was lower, the player 
+would be half off the screen or even off the screen entirely.
+
+Confusingly, (0,0) on a canvas is the top left corner. Unlike a graph where (0,0) is in the bottom left corner.
+*/
+const characterPosition = {
+	x: 0,
+	y: canvas.height - blockWidth
+}
+
+/*
+This is a function. You may have already looked at https://www.w3schools.com/js/js_functions.asp but if not, I
+reccommend it as a good first step at understanding what a function is.
+
+A function has a name and can take 0 or more arguments. It contains a block of code to perform a particular task
+that we'll want to use several times. Think of it as an alternative to copying and pasting the same code all
+over the place.
+
+This function is called drawSquare and takes 3 arguments, x, y, and colour. x and y are the coordinates of
+the top left corner of the square to draw and colour will be a string (series of characters i.e some text https://www.w3schools.com/jsref/jsref_obj_string.asp).
+
+We use these parameters when calling methods on the ctx object. Remeber the ctx variable contains an object
+representing our HTML canvas. What's a method? A method is basically another name for a function but a method
+is a function that belongs to an object.
+
+So in this function we tell our canvas context to set the canvas's current fill colour for shapes to be the
+colour string we passed as a parameter to this function. We then tell the canvas to create a filled rectangle
+at the position we passed to the function in the x and y parameters. The width and height of the rectangle is the
+blockWidth variable we defined earlier.
+*/
+function drawSquare(x, y, colour) {
+	ctx.fillStyle = colour
+	ctx.fillRect(x, y, blockWidth, blockWidth)
+}
+
+/*
+This is another function. This one takes no arguments, it just does something. We actually only call this function
+once so you could argue it doesn't need to exist at all.
+
+However, splitting code up into functions can make it easier to read. Plus the name of the function helps to
+describe what the code does. Good code doesn't have lots of comments like these explaining everything everything,
+the names of functions and variables are usually enoiugh to help the reader understand what the code is doing.
+Choosing good names for functions and variables is hard and something even the best programmers struggle with.
+
+This function uses the map variable (the array of arrays) defined above and uses it to draw the game's map.
+It reads through all the numbers in each array and draws nothing if the number is a 0 and draws a back sqaure
+at the correct position if the number is a 1. Let's dive in and see how that works...
+*/
+function drawMap() {
+	/*
+	This here is called a 'for loop'. You can read more about them here https://www.w3schools.com/js/js_loop_for.asp
+	
+	A for loop contains a block of code that is to be repeated. The conditions for how many times to repeat
+	the loop are described in the first line. Let's break that first line down.
+
+	What we do here is define a variable called i with the value 0. We defined the variable with let rather than
+	const. What this means is that we can change what is assigned to i.
+		 	|
+		 	|		This is the condition for the for loop. As long as this condition is true. The loop will
+		 	|		continue to run. The condition here is that the loop can run if the variable i is less than
+		 	|       the height of the map.
+		 	|           |
+		 	|			|
+		 	|			|		This bit of code is run after the block of code inside the loop runs. The ++ means
+		 	|			|		"add 1". So each time the loop runs, we add 1 to the number contained in i. Eventually
+		 	|			|		the number in i will be greater than the number representing the height of the map
+		 	|			|		and the loop will stop running.
+		 	|			|			|
+		 	|			|			|
+			|			|			|
+		 	V			v           v
+	for (let i = 0; i < mapHeight; i++) {
+		Anything inside the { and the } gets repeated each time the loop runs.
+	}
+
+	*/
+	for (let i = 0; i < mapHeight; i++) {
+		/*
+		The code block for the first loop contains.. ANOTHER LOOP. These are called nested loops.
+		What this loops is doing is initializing a variable called j with the value 0. Then it runs the code in its
+		block again and again adding 1 to j each time. Once j is no longer less than the width of the map the loop stops.
+		*/
+		for (let j = 0; j < mapWidth; j++) {
+			/*
+			The line below is called an if statement (https://www.w3schools.com/js/js_if_else.asp)
+
+			An if statement takes a "condition" that evaluates to true or false.
+
+			Here we use the i and the j variables to get the array at position i from the array of arrays contained in the variable map.
+			We then get the number in position j of that inner array.
+
+			Our conditon for the if statement is then, if the number is equal to 1 (that's what == means), then run the code contained
+			in the curly braces (the { and the }).
+
+			The code in the curly braces is a call to the drawSquare function we defined earlier. Basically we draw a square on the canvas
+			in the position of the map we're reading. Remember i and j are just numbers representing the position in the array of arrays.
+			To convert them into coordinates for the canvas we multiply them by the width of the blocks we're using for our map. The * is a multiplication symbol.
+			*/
+			if (map[i][j] == 1) {
+				drawSquare(j*blockWidth, i*blockWidth, 'black')
+			}
+		}
+	}
+}
+
+/*
+This is another function, this one takes no arguments so just has an empty parentheses.
+
+It calls the drawSquare function we called earlier using the x and y properties of the characterPosition object.
+
+As you can probably tell, this function is used to draw a red square that represents the playable character.
+*/
+function drawCharacter() {
+	drawSquare(characterPosition.x, characterPosition.y, 'red')
+}
+
+/*
+Another function. This one draws the entire game. To do this it draws a grey rectangle that covers the whole canvas.
+This acts as the background. The colours is represented by the string "#eeeeee". This is called a colour hex code. Read
+more about them here https://www.w3schools.com/html/html_colors_hex.asp.
+
+At the beginning of the function we call the clearRect method on the canvas context. This sets the canvas pixels
+to be transparent black, in effect emptying the canvas of everything we've already drawn. This is so we can reset
+the canvas and draw the latest state of the game.
+*/
+function drawGame() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "#eeeeee"
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+	drawMap()
+	drawCharacter()
+}
+
+/*
+Here we're calling the setInterval function. setInterval is a built in JavaScript function that takes another function
+as an argument and a number. What the setInterval function does is it calls the function that you pass it every x milliseconds, where x
+is the number you passed as the second argument. So here we pass the drawGame function and the number 20. This means setInterval
+will call the drawGame function every 20ms.
+
+Notice we wrote drawGame not drawGame(). That's because we're passing the variable that contains the drawGame function, not calling
+the drawGame function
+*/
+setInterval(drawGame, 20)
+
+
+/*
+This function returns something. This is represented by writing return followed by the thing you want the function to return.
+
+This means you can then assign the thing that is returned to a variable. For example here you could write:
+
+const characterCoords = characterPositionToMapCoordinates()
+
+and you would then have the result of this function stored in the characterCoords variable.
+
+As you can probably tell by the name. This function converts the character's position in pixels stored in the characterPosition object
+into some numbers that can be used to access the array of arrays contained in the map variable. This will gives us the position
+of the character in that array of arrays at the current time. We need to know the characters position so we can work out if
+they're allowed to move in certain directions. Notice we use it 4 times in the functions below. This shows how functions can be useful,
+without functions we'd have had to copy and paste this code 4 times. This means if what it does ever needed to be changed, we'd
+then have to remember to change it in 4 places!
+*/
+function characterPositionToMapCoordinates() {
+	return {
+		x: characterPosition.x / blockWidth,
+		y: characterPosition.y / blockWidth
+	}
+}
+
+/*
+The four functions below are all very similar but also subtley different. They get the character's current position on the map
+and then work out whether the character is allowed to move in the direction specified in the function name. Notice how we add or
+subtract one from the character's position to get the neighbouring square on the map.
+
+We check if the neighbouring square is undefined, this means we tried to access an index of one of the arrays that does not exist
+i.e a number that was either less than 0 or greater than the length of the array. This would mean the player is at the edge of the
+map and therefore cannot move any further in that particuar direction.
+
+We then check if the neighbouring square in that direct has a value equal to 1. This would mean the square contains a wall, therefore
+the character cannot move there.
+
+The value we return is either true or false. This is called a boolean value (https://www.w3schools.com/js/js_booleans.asp).
+
+The line of code return !isEdge && !hasWall can be translated as "not an edge and not a wall", ! means not and && means and i.e, the character can move in a given direction if the next square in that direction is not a wall or the edge of the map.
+*/
+function characterCanMoveRight() {
+	const coords = characterPositionToMapCoordinates()
+	const isEdge = map[coords.y][coords.x + 1] === undefined
+	const hasWall = map[coords.y][coords.x + 1] === 1
+	return !isEdge && !hasWall
+}
+
+function characterCanMoveLeft() {
+	const coords = characterPositionToMapCoordinates()
+	const isEdge = map[coords.y][coords.x - 1] === undefined
+	const hasWall = map[coords.y][coords.x - 1] === 1
+	return !isEdge && !hasWall
+}
+
+function characterCanMoveUp() {
+	const coords = characterPositionToMapCoordinates()
+	const isEdge = map[coords.y - 1][coords.x] === undefined
+	const hasWall = map[coords.y - 1][coords.x] === 1
+	return !isEdge && !hasWall
+}
+
+function characterCanMoveDown() {
+	const coords = characterPositionToMapCoordinates()
+	const isEdge = map[coords.y + 1][coords.x] === undefined
+	const hasWall = map[coords.y + 1][coords.x] === 1
+	return !isEdge && !hasWall
+}
+
+
+/*
+Here we define some variables that represent different keys on the keyboard. Every key on the keyboard is represented
+by a number in JavaScript. The following numbers correspond to the keys in the variable name.
+
+Have a look at https://keycode.info/ to find out what the numbers for other keys are.
+*/
+const UP_ARROW = 38
+const DOWN_ARROW = 40
+const LEFT_ARROW = 37
+const RIGHT_ARROW = 39
+
+/*
+This is the final part of the program. We need to be able to control our character. To do that we have to register an
+event listener for the keydown event. What that means is we need to provide a function that will be called each time a key is pressed.
+
+window is variable that contains the state of the webpage. It has lots of properties and methods 
+that we can use to manipulate the webpage. Here we are calling the addEventListener method. This method takes 2 arguments:
+the name of the event we want to listen to and a function that should be called when that event occurs.
+
+As you can see we provide the arguments 'keydown' meaning we want to listen to events where a key on the keyboard is pressed
+and we provide a function that takes an argument e. The e argument will be an object containing information about the event that
+has just occured. One of the properties of the 'keydown' event is called the keyCode. This contains the number representing
+the key that was pressed. What the code in our event listener does is it compares the keycode to the ones for the up, down,
+left and right arrows on the keyboard. If any of them match, we also check if the character can move in that direction. If that
+is the case, then we make the corresponding change to the character's position in our characterPosition object.
+
+As we saw earlier in the code, the numbers stored in this position are used to calculate the position of the square we draw to
+represent the character. Remember, we redraw the game every 20ms so the next time it is drawn, it will represent the new position
+of the character after keys have been pressed.
+*/
+window.addEventListener('keydown', function (e) {
+    if (e.keyCode == UP_ARROW && characterCanMoveUp()) {
+    	console.log(characterPositionToMapCoordinates())
+        characterPosition.y -= 10
+    } else if (e.keyCode == DOWN_ARROW && characterCanMoveDown()) {
+        characterPosition.y += 10
+    } else if (e.keyCode == LEFT_ARROW && characterCanMoveLeft()) {
+        characterPosition.x -= 10
+    } else if (e.keyCode == RIGHT_ARROW && characterCanMoveRight()) {
+        characterPosition.x += 10
+    }
+});
+
+/*
+I hope this has been relatively easy to understand. Don't worry if you don't understand everything, try reading the links provided
+to w3schools which will provided a more comprehensive explanation of all the features of JavaScript that we have covered.
+
+Many of these features are also present in other programming languages. Once you have a firm grasp of how to program in one language,
+it is much easier to pick up a second language, then a third etc. Programming languages are tools,  some of them work better than
+others for solving different problems. I hope this initial guide as got you interested. 
+
+Now you understand the code here, play with it! Change things, add features and have fun. Perhaps you could even turn it into a proper
+game with objectives and different levels. The possibilities are endless.
+*/
+
+</script>
+</body>
+</html>
